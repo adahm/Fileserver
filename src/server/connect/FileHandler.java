@@ -14,5 +14,11 @@ package server.connect;
 
 //
 
-public class FileHanlder {
+import java.net.Socket;
+
+public class FileHandler extends Thread{
+
+    public FileHandler(Socket socket){
+
+    }
 }

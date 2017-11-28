@@ -1,9 +1,6 @@
 package client.connect;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.util.concurrent.ForkJoinPool;
 //fixa en sendFIle metod
@@ -14,28 +11,33 @@ import java.util.concurrent.ForkJoinPool;
 public class Clientconnect {
     private Socket client;
 
-    private BufferedReader input;
-    private PrintWriter output;
+    private InputStream input;
+    private OutputStream output;
 
-    public void connect(String host, int port, OutObserver out) throws IOException {
-        client = new Socket("localhost", port);
-        input = new BufferedReader(new InputStreamReader(client.getInputStream()));
-        output = new PrintWriter(client.getOutputStream(), true);
-        ForkJoinPool.commonPool().execute(() -> readInput(out));
+    public void connect() throws IOException {
+        client = new Socket("localhost", 2000);
+        input = client.getInputStream();
+        output = client.getOutputStream();
+
+        ForkJoinPool.commonPool().execute(() -> readInput());
     }
-    FileInputStream fis;
-    BufferedInputStream bis;
-    BufferedOutputStream out;
-    byte[] buffer = new byte[8192];
-        try {
-        fis = new FileInputStream(file);
-        bis = new BufferedInputStream(fis);
-        out = new BufferedOutputStream(socket.getOutputStream());
-        int count;
-        while ((count = bis.read(buffer)) > 0) {
-            out.write(buffer, 0, count);
+    public void sendFile(File fileToSend)throws IOException{
+        byte[] buffer = new byte[(int)fileToSend.length()];
+        BufferedInputStream filReader = new BufferedInputStream(new FileInputStream(fileToSend));
+        filReader.read(buffer,0,buffer.length);
+        output.write(buffer,0,buffer.length);
+        output.flush();
+    }
 
+    public void downloadFile(File reciverFile) throws FileNotFoundException,IOException{
+        byte[] buffer = new byte[1000000];
+        BufferedOutputStream fileWrite = new BufferedOutputStream(new FileOutputStream(reciverFile));
+        int n;
+        while ((n = input.read(buffer)) != -1) {
+            fileWrite.write(buffer, 0, n);
         }
+        fileWrite.close();
+    }
 
     public void quit() throws IOException{
         client.close();

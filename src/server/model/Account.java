@@ -1,19 +1,22 @@
 package server.model;
 
-import server.integration.AccountDAO;
+import server.integration.FileDAO;
 
 public class Account{
     private String name;
     private String password;
-    private transient AccountDAO accountDB;
+    private transient FileDAO fileDAO;
 
-    public Account(String name, String password, AccountDAO accountDB){
+    public Account(String name, String password, FileDAO fileDAO){
         this.name = name;
         this.password = password;
-        this.accountDB = accountDB
+        this.fileDAO = fileDAO
     }
 
     public String getName(){
         return name;
+    }
+    public String getPassword(){
+        return password;
     }
 }
