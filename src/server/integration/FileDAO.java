@@ -15,6 +15,7 @@ public class FileDAO {
     private PreparedStatement findAccountStmt;
     private PreparedStatement createAccountStmt;
     private PreparedStatement deleteAccountStmt;
+    private PreparedStatement loginStmt;
 
     private PreparedStatement findFileStmt;
     private PreparedStatement createFileStmt;
@@ -37,6 +38,20 @@ public class FileDAO {
         }
         //sätt upp connection med db
 
+    }
+    public boolean tryLogin(String username, String password){
+        ResultSet rset = null;
+        try {
+            loginStmt.setString(1,username);
+            loginStmt.setString(2,password);
+            rset = loginStmt.executeQuery();
+            if (rset.next()){
+                return true;
+            }
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return false;
     }
     //metod för att kolla upp om acount finns i DB
     public Account findAccount(String accountName){
@@ -114,7 +129,7 @@ public class FileDAO {
             getFileListStmt.setString(1,RequestName);
             ResultSet rset = getFileListStmt.executeQuery();
             while (rset.next()){
-                files.add(new File(rset.getString(1),rset.getInt(2),rset.getString(3),rset.getBoolean(4),rset.getBoolean(5),rset.getBoolean(6),rset.getBoolean(7));)
+                files.add(new File(rset.getString(1),rset.getInt(2),rset.getString(3),rset.getBoolean(4),rset.getBoolean(5),rset.getBoolean(6),rset.getBoolean(7)));
             }
 
         }catch (SQLException e){
@@ -178,7 +193,7 @@ public class FileDAO {
 
     public void createStatments(Connection con){
         try {
-            findAccountStmt = con.prepareStatement("SELECT * FROM account WHERE user = ?)");
+            findAccountStmt = con.prepareStatement("SELECT * FROM account WHERE user = ?");
             createAccountStmt = con.prepareStatement("INSERT INTO account VALUES(?,?)");
             findFileStmt = con.prepareStatement("SELECT * FROM file WHERE NAME  = ?");
             deleteAccountStmt = con.prepareStatement("DELETE FROM account WHERE user = ?");
@@ -188,6 +203,7 @@ public class FileDAO {
             updateFileStmt = con.prepareStatement("UPDATE file SET size = ?, private = ?, read= ?, write = ? WHERE name = ?");
             setTrackerStmt = con.prepareStatement("UPDATE file SET track = ? WHERE name = ?");
             checkTrackerSmt = con.prepareStatement("SELECT owner,track FROM file WHERE name = ?");
+            loginStmt = con.prepareStatement("SELECT * FROM account WHERE user = ? AND password =? ");
         }catch (Exception e){
             e.printStackTrace();
         }

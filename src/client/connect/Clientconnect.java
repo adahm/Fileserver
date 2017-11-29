@@ -18,8 +18,6 @@ public class Clientconnect {
         client = new Socket("localhost", 2000);
         input = client.getInputStream();
         output = client.getOutputStream();
-
-        ForkJoinPool.commonPool().execute(() -> readInput());
     }
     public void sendFile(File fileToSend)throws IOException{
         byte[] buffer = new byte[(int)fileToSend.length()];
@@ -29,8 +27,9 @@ public class Clientconnect {
         output.flush();
     }
 
-    public void downloadFile(File reciverFile) throws FileNotFoundException,IOException{
+    public void downloadFile(File reciverFile) throws IOException{
         byte[] buffer = new byte[1000000];
+        reciverFile.createNewFile();
         BufferedOutputStream fileWrite = new BufferedOutputStream(new FileOutputStream(reciverFile));
         int n;
         while ((n = input.read(buffer)) != -1) {
@@ -39,27 +38,4 @@ public class Clientconnect {
         fileWrite.close();
     }
 
-    public void quit() throws IOException{
-        client.close();
-    }
-
-    public void sendGuess(String guess){
-        output.println(guess);
-    }
-
-    public void start(){
-        output.println("START");
-    }
-
-    //using the observer pattern shown on the coursewebb
-    public void readInput(OutObserver out){
-        String in;
-        try {
-            while ((in = input.readLine()) != null) {
-                out.getServerInput(in);
-            }
-        }catch (IOException e){
-            e.printStackTrace();
-        }
-    }
 }

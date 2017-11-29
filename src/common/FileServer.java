@@ -16,7 +16,7 @@ public interface FileServer extends Remote {
 
     boolean login(String username, String password)throws RemoteException;
 
-    void upload()throws RemoteException;
+    void upload(String username,String filename)throws RemoteException;
 
     File get(String Filename) throws RemoteException;
 

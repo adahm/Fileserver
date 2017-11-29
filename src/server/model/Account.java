@@ -10,7 +10,7 @@ public class Account{
     public Account(String name, String password, FileDAO fileDAO){
         this.name = name;
         this.password = password;
-        this.fileDAO = fileDAO
+        this.fileDAO = fileDAO;
     }
 
     public String getName(){
