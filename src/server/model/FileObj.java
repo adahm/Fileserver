@@ -1,6 +1,8 @@
 package server.model;
 
-public class File {
+import java.io.Serializable;
+
+public class FileObj {
     private String name;
     private int size;
     private String owner;
@@ -11,7 +13,7 @@ public class File {
 
 
 
-    public File(String name, int size, String owner, Boolean premission, Boolean read, Boolean write, Boolean track) {
+    public FileObj(String name, int size, String owner, Boolean premission, Boolean read, Boolean write, Boolean track) {
         this.name = name;
         this.size = size;
         this.owner = owner;
@@ -47,5 +49,18 @@ public class File {
 
     public Boolean getTrack() {
         return track;
+    }
+
+    @Override
+    public String toString() {
+        return "File{" +
+                "name='" + name + '\'' +
+                ", size=" + size +
+                ", owner='" + owner + '\'' +
+                ", premission=" + premission +
+                ", read=" + read +
+                ", write=" + write +
+                ", track=" + track +
+                '}';
     }
 }
