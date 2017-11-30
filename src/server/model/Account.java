@@ -5,12 +5,10 @@ import server.integration.FileDAO;
 public class Account{
     private String name;
     private String password;
-    private transient FileDAO fileDAO;
 
-    public Account(String name, String password, FileDAO fileDAO){
+    public Account(String name, String password){
         this.name = name;
         this.password = password;
-        this.fileDAO = fileDAO;
     }
 
     public String getName(){

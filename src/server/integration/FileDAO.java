@@ -8,9 +8,9 @@ import java.sql.*;
 import java.util.ArrayList;
 
 public class FileDAO {
-    private String URL = "jdbc:mysql:///file";
-    private String driver = "com.mysql.jdbc.Driver";
-    private String userID = "root";
+    private String URL = "jdbc:mysql:///file"; //url to the mysql db
+    private String driver = "com.mysql.jdbc.Driver"; //driver for the Mysql DB
+    private String userID = "root"; //user id to the DB
 
     private PreparedStatement findAccountStmt;
     private PreparedStatement createAccountStmt;
@@ -26,8 +26,9 @@ public class FileDAO {
     private PreparedStatement setTrackerStmt;
     private PreparedStatement checkTrackerSmt;
     private PreparedStatement checkIfFileOwner;
+    private PreparedStatement checkWriteFileAccessStmt;
 
-
+    //set up a connection the mysql DB
     public FileDAO(){
         try{
             Connection con;
@@ -37,9 +38,9 @@ public class FileDAO {
         }catch (Exception e){
             e.printStackTrace();
         }
-        //sätt upp connection med db
-
     }
+
+    //return true if username and password pair is in db otherwise false
     public boolean tryLogin(String username, String password){
         ResultSet rset = null;
         try {
@@ -54,21 +55,22 @@ public class FileDAO {
         }
         return false;
     }
-    //metod för att kolla upp om acount finns i DB
+    //return acunt if accountName is in Db otherwise null
     public Account findAccount(String accountName){
         ResultSet rset = null;
         try {
             findAccountStmt.setString(1,accountName);
             rset = findAccountStmt.executeQuery();
             if (rset.next()){
-                return new Account(accountName,rset.getString(1),this);
+                return new Account(accountName,rset.getString(1));
             }
         }catch (SQLException e){
             e.printStackTrace();
         }
         return null;
     }
-    //metod för att lägga till konto
+
+    //inserts a row in the acount table
     public void createAccount(Account account){
         try {
             createAccountStmt.setString(2,account.getName());
@@ -78,8 +80,8 @@ public class FileDAO {
             e.printStackTrace();
         }
     }
-    //metod för att kolla om filnamn finns i db
 
+    //returns a file if it exist in the DB
     public FileObj findFile(String filename){
         ResultSet rset = null;
         try {
@@ -93,12 +95,14 @@ public class FileDAO {
         }
         return null;
     }
+
+    //create an entry in the File table
     public void createFile(FileObj fileObj){
         try {
          createFileStmt.setString(1, fileObj.getName());
          createFileStmt.setInt(2, fileObj.getSize());
          createFileStmt.setString(3, fileObj.getOwner());
-         createFileStmt.setBoolean(4, fileObj.getPremission());
+         createFileStmt.setBoolean(4, fileObj.getPrivateFile());
          createFileStmt.setBoolean(5, fileObj.getRead());
          createFileStmt.setBoolean(6, fileObj.getWrite());
          createFileStmt.setBoolean(7, fileObj.getTrack());
@@ -107,6 +111,8 @@ public class FileDAO {
             e.printStackTrace();
         }
     }
+
+    //check if the user is allowed to read the file
     public Boolean checkAcess(String userName, String filename){
         ResultSet rset = null;
         try {
@@ -121,6 +127,25 @@ public class FileDAO {
         }
         return false;
     }
+
+    //check if the user is allowed to write to the file
+    public boolean checkWritePrem(String userName,String filename){
+        ResultSet rset = null;
+        try {
+            checkWriteFileAccessStmt.setString(1,filename);
+            checkWriteFileAccessStmt.setString(2,userName);
+            rset = checkWriteFileAccessStmt.executeQuery();
+            if (rset.next()){
+                return true;
+            }
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+
+    //deletes the acount entry in the acount table
     public void deleteAccount(String accName){
         try {
            deleteAccountStmt.setString(1,accName);
@@ -129,6 +154,8 @@ public class FileDAO {
             e.printStackTrace();
         }
     }
+
+    //deletes an file entry in the file table
     public void deleteFile(String fileName){
         try {
             deleteFileStmt.setString(1,fileName);
@@ -138,6 +165,7 @@ public class FileDAO {
         }
     }
 
+    //returns a list of strings that are the entries that the user is allowed to see in the file table
     public ArrayList<String> getFiles(String RequestName){
         ArrayList<String> fileObjs = new ArrayList<>();
         try {
@@ -153,6 +181,7 @@ public class FileDAO {
         return fileObjs;
     }
 
+    //update a file entry in the file table
     public void updateFile(String filname,int size, Boolean setPrivate, Boolean setRead, Boolean setWrite){
         try {
             updateFileStmt.setInt(1,size);
@@ -165,6 +194,8 @@ public class FileDAO {
             e.printStackTrace();
         }
     }
+
+    //set the tracker colum in a file entry to true
     public void setTracker(String filname, Boolean setTrack){
         try {
             setTrackerStmt.setBoolean(1,setTrack);
@@ -176,22 +207,23 @@ public class FileDAO {
         }
     }
 
-    public boolean checkIfTracked(String filname,String owner){
+    //return true if the track paramter is set to true and the user requesting is not the owner,
+    public String checkIfTracked(String filname,String owner){
         try {
             checkTrackerSmt.setString(1,filname);
             checkTrackerSmt.setString(2,owner);
             ResultSet rset = checkTrackerSmt.executeQuery();
             if (rset.next()){
                 if(rset.getBoolean(1)){
-                    return true;
+                    return rset.getString(2);
                 }
             }
         }catch (SQLException e){
             e.printStackTrace();
         }
-        return false;
+        return null;
     }
-
+    //return true if the user is the owner of the file
     public boolean checkIfFileOwner(String acountName, String filename){
         try {
             checkIfFileOwner.setString(1,filename);
@@ -206,39 +238,37 @@ public class FileDAO {
         return false;
     }
 
-    //metod för att lägga till en fil
-
-    //metod för att hämta lista med filer
-
-    //metod för att kolal tracker
-
-    //metod för att ta bort konto
-
-    //metod för att ta bort fil
-
-    //metod för att logga in jämföra namn och pass
-
-    //metod för att sätta track till true på en fil
 
     public void createStatments(Connection con){
         try {
+            //get the rows where the username is asked for
             findAccountStmt = con.prepareStatement("SELECT * FROM account WHERE user = ?");
+
+            //create row in the account table
             createAccountStmt = con.prepareStatement("INSERT INTO account VALUES(?,?)");
+            //find a file with a given name
             findFileStmt = con.prepareStatement("SELECT * FROM file WHERE NAME  = ?");
+            //delete an account with a given name
             deleteAccountStmt = con.prepareStatement("DELETE FROM account WHERE user = ?");
+            //deltete a file with a given name
             deleteFileStmt = con.prepareStatement("DELETE FROM file WHERE name = ?");
+            //inseret a row in the file table
             createFileStmt = con.prepareStatement("INSERT INTO file VALUES (?,?,?,?,?,?,?)");
-
+            //get the entries in the file table with a given owner or where they are set to not private and read to true
             getFileListStmt = con.prepareStatement("SELECT * FROM file WHERE owner = ? OR (private = '0' AND file.read = '1')");
-
-            checkFileAccessStmt = con.prepareStatement("SELECT * FROM file WHERE name = ? AND (owner = ? OR (private = '1' AND file.read = '0'))");
-
+            //get entry for a file with the supliedd filename and where the owner is correct or the file is set to public and to read acess to true
+            checkFileAccessStmt = con.prepareStatement("SELECT * FROM file WHERE name = ? AND (owner = ? OR (private = '0' AND file.read = '1'))");
+            //get enrty frin fuke table with given filename and owner name or set to private and allowed to write
+            checkWriteFileAccessStmt = con.prepareStatement("SELECT * FROM file WHERE name = ? AND (owner = ? OR (private = '0' AND file.write = '1'))");
+            //uppdate a file with the given name
             updateFileStmt = con.prepareStatement("UPDATE file SET size = ?, private = ?, file.read= ?, file.write = ? WHERE name = ?");
-
+            //set track to true in a given file
             setTrackerStmt = con.prepareStatement("UPDATE file SET track = ? WHERE name = ?");
+            //check if the tracker is true in a given file and where the one that is checking is not the owner so we should send a message
             checkTrackerSmt = con.prepareStatement("SELECT track FROM file WHERE name = ? AND owner <> ?");
-
+            //return a row if the given username and password pair exist in the table
             loginStmt = con.prepareStatement("SELECT * FROM account WHERE user = ? AND password =? ");
+            //return the owner of a given file if the requester is the owner
             checkIfFileOwner = con.prepareStatement("SELECT owner FROM file WHERE name = ? AND owner = ?");
         }catch (Exception e){
             e.printStackTrace();

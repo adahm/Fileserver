@@ -6,9 +6,11 @@ import java.net.Socket;
 
 public class ServerConnect {
     ServerSocket serverSocket;
+    //set up serversocket to accept connections to send files
     public ServerConnect() throws IOException{
         serverSocket = new ServerSocket(2000);
     }
+    //get the connection from the the client that wants to dowload/uppload a file
     public Socket getConnection() {
         try {
             Socket s =  serverSocket.accept();

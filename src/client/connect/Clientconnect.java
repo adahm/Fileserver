@@ -19,7 +19,10 @@ public class Clientconnect {
 
         input = client.getInputStream();
         output = client.getOutputStream();
+        //connect to the server and set up output and input streams
     }
+
+    //read from the selected file and write to the outputbuffer and then close the connections to the server
     public void sendFile(File fileToSend)throws IOException{
         byte[] buffer = new byte[(int)fileToSend.length()];
         BufferedInputStream filReader = new BufferedInputStream(new FileInputStream(fileToSend));
@@ -32,7 +35,7 @@ public class Clientconnect {
         client.close();
         System.out.println("sent");
     }
-
+    //create a stream to write to the file and get the input from the server and write it to the file and then close the connection to the server
     public void downloadFile(File reciverFile) throws IOException{
         byte[] buffer = new byte[1000000];
         BufferedOutputStream fileWrite = new BufferedOutputStream(new FileOutputStream(reciverFile));

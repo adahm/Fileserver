@@ -18,11 +18,7 @@ public interface FileServer extends Remote {
 
     void login(String username, String password,Client remoteClient)throws RemoteException,AccountException;
 
-    boolean FileExist(String filename)throws RemoteException;
-
     void upload(String fileowner, String filename,Boolean premision, Boolean write, Boolean read)throws RemoteException,FileObjException;
-
-    boolean fileacess(String accountName, String filename)throws RemoteException;
 
     void download(String accountName,String Filename) throws RemoteException,FileObjException;
 

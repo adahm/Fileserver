@@ -1,23 +1,21 @@
 package server.model;
 
-import java.io.Serializable;
-
 public class FileObj {
     private String name;
     private int size;
     private String owner;
-    private Boolean premission;//kanse gör til bool
+    private Boolean privateFile;//kanse gör til bool
     private Boolean read;
     private Boolean write;
     private Boolean track;
 
 
 
-    public FileObj(String name, int size, String owner, Boolean premission, Boolean read, Boolean write, Boolean track) {
+    public FileObj(String name, int size, String owner, Boolean privateFile, Boolean read, Boolean write, Boolean track) {
         this.name = name;
         this.size = size;
         this.owner = owner;
-        this.premission = premission;
+        this.privateFile = privateFile;
         this.read = read;
         this.write = write;
         this.track = track;
@@ -35,8 +33,8 @@ public class FileObj {
         return owner;
     }
 
-    public Boolean getPremission() {
-        return premission;
+    public Boolean getPrivateFile() {
+        return privateFile;
     }
 
     public Boolean getRead() {
@@ -57,7 +55,7 @@ public class FileObj {
                 "name='" + name + '\'' +
                 ", size=" + size +
                 ", owner='" + owner + '\'' +
-                ", premission=" + premission +
+                ", privateFile=" + privateFile +
                 ", read=" + read +
                 ", write=" + write +
                 ", track=" + track +

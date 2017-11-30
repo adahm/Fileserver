@@ -15,9 +15,10 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Scanner;
-public class Ui implements Runnable, Client {
+public class Ui extends UnicastRemoteObject implements Runnable, Client {
         private final Scanner in = new Scanner(System.in);
         private Boolean go = true;
         private Boolean loggedin = false;
@@ -37,6 +38,8 @@ public class Ui implements Runnable, Client {
             }catch (Exception e){
                 e.printStackTrace();
             }
+            //first set of commands
+            System.out.println("Log in to do file operations");
             do {
                 try {
                     System.out.println("Write CMDS to see commands");
@@ -44,17 +47,18 @@ public class Ui implements Runnable, Client {
                     String[] splitinput = input.split(" ");
                     String cmd = splitinput[0];
                     switch(cmd){
-                        case "REGISTER":
+                        case "REGISTER": //take the input and try to register at server
                             server.register(splitinput[1],splitinput[2]);
                             break;
                         case "UNREGISTER":
                             server.unregister(splitinput[1],splitinput[2]);
                             break;
-                        case "LOGIN":
+                        case "LOGIN": //when logged in send the object so the server can do call by refrence when we want to track a file
                             server.login(splitinput[1],splitinput[2],this);
                             loggedin = true;
+                            System.out.println("logged in");
                             accountName = splitinput[1];
-                            loginview();
+                            loginview();//move to logged in set of commands
                             break;
                         case "CMDS":
                             printCMDS();
@@ -69,6 +73,7 @@ public class Ui implements Runnable, Client {
                     System.out.println(e.getMessage());
                 }
             }while(go);
+            System.exit(1);
         }
         public void loginview() throws RemoteException{
             do{
@@ -78,8 +83,7 @@ public class Ui implements Runnable, Client {
                     input = in.nextLine();
                     String[] splitinput = input.split(" ");
                     String cmd = splitinput[0];
-                    switch (cmd) { //se till att skicka med acount för att om private file
-                        //kanske lägg till oprtions när fille lddas upp om
+                    switch (cmd) {
                         case "UPLOAD": //upload a file
                             System.out.println("Filename:");
                             filename = in.nextLine();
@@ -102,9 +106,12 @@ public class Ui implements Runnable, Client {
                                 else {
                                     readprem = false;
                                 }
+                                //call the upploadfile method to connect to server
                                 upploadFile(filename);
+                                //call the upload method to add the file enrty in DB and to say to the server to accept connection
                                 server.upload(accountName, filename, false, writeprem, readprem);
                             } else {
+                                //if we choosed private file to true set write and read to false
                                 upploadFile(filename);
                                 server.upload(accountName, filename, true, false, false);
                             }
@@ -131,9 +138,12 @@ public class Ui implements Runnable, Client {
                                 else {
                                     readprem = false;
                                 }
+                                //call the upploadfile method to connect to server
                                 upploadFile(filename);
+                                //call the upload method to add the file enrty in DB and to say to the server to accept connection
                                 server.update(accountName,filename, false,writeprem,readprem);
                             } else {
+                                //if set to private set write and read to false
                                 upploadFile(filename);
                                 server.update(accountName, filename, true, false, false);
                             }
@@ -141,19 +151,21 @@ public class Ui implements Runnable, Client {
                         case "DELETE"://delete file on the server
                             System.out.println("Filename:");
                             filename = in.nextLine();
+                            //get the filename and send it to server
                             server.delete(accountName, filename);
                             break;
                         case "RETREIVE":
                             System.out.println("Filename:");
                             filename = in.nextLine();
                             server.download(accountName, filename);
+                            //send the message to server that we want to dowlaod and then connect to get the file
                             downloadFile(filename);
                             break;
                         case "LIST"://list files on server we can se
                             ArrayList<String> filelist = server.listfiles(accountName);
                             for (String f : filelist) {
                                 System.out.println(f);
-                            } //fix print
+                            }
                             break;
                         case "TRACK"://track a file set tracker atribute to file so when someone update or delete or get the file we will get snet a message
                             System.out.println("Filename:");
@@ -175,15 +187,17 @@ public class Ui implements Runnable, Client {
                     System.out.println(e.getMessage());
                 }
             }while(loggedin);
+            System.out.println("logged out");
         }
+
         public void upploadFile(String filename){
             try {
                 Clientconnect c = new Clientconnect();
-                c.connect();
-                System.out.println("go connection");
+                c.connect(); //call connection method i clientconnect
+                System.out.println("got connection");
                 URL url = getClass().getResource(filename);
-                File file = new File(url.getPath());
-                c.sendFile(file);
+                File file = new File(url.getPath());//get the path to the file it is assumed that the file is in the view folder
+                c.sendFile(file); //call the sendfile in clientconnect
             }catch (IOException e){
                 e.printStackTrace();
             }
@@ -191,10 +205,10 @@ public class Ui implements Runnable, Client {
         public void downloadFile(String filename){
             try {
                 Clientconnect c = new Clientconnect();
-                c.connect();
+                c.connect(); //connect to the server
                 System.out.println("go connection");
-                File f = new File("C:/Users/Andreas/IdeaProjects/Fileserver/src/client/view/"+filename);
-                f.createNewFile();
+                File f = new File("C:/Users/Andreas/IdeaProjects/Fileserver/src/client/view/"+filename); //set path to where the dowload file wil be saved
+                f.createNewFile(); //create the file if it doen´t exist
                 c.downloadFile(f);
             }catch (IOException e){
                 e.printStackTrace();
@@ -208,10 +222,11 @@ public class Ui implements Runnable, Client {
             System.out.println(msg);
     }
     public void printCMDS(){
-        System.out.println("REGISTER");
-        System.out.println("UNREGISTER");
-        System.out.println("LOGIN");
+        System.out.println("REGISTER name password");
+        System.out.println("UNREGISTER name password");
+        System.out.println("LOGIN name password");
         System.out.println("LOGOUT");
+        System.out.println("LIST");
         System.out.println("QUIT");
         System.out.println("UPLOAD");
         System.out.println("UPDATE");
