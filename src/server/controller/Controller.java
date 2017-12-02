@@ -86,7 +86,9 @@ public class Controller extends UnicastRemoteObject implements FileServer{
         //check if the user has permission to read the file
         if(fileDb.checkAcess(accountName,filename)){
             if((owner = fileDb.checkIfTracked(filename,accountName)) != null){ //if the file is tracked send a message that it is downloaded to the owner
+                System.out.println("tracked");
                 Client c = clientHashMap.get(owner);
+                System.out.println(owner);
                 try{
                     c.getTrackerInfo(accountName+" downloaded "+ filename);
                 }catch (RemoteException e){

@@ -29,7 +29,7 @@ public class FileHandler {
         //get the stream to the client
         InputStream input = clientSocket.getInputStream();
 
-        byte[] buffer = new byte[1000000];
+        byte[] buffer = new byte[1000000000];
         //stream to write to the file
         BufferedOutputStream fileWrite = new BufferedOutputStream(new FileOutputStream(f));
         int n;
@@ -40,7 +40,7 @@ public class FileHandler {
         System.out.println("server got file");
         fileWrite.flush();
         fileWrite.close();
-        input.close();
+        clientSocket.close();
         //close connection and return the file length to save in DB
         return (int) f.length();
     }

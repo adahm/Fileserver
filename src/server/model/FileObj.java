@@ -4,7 +4,7 @@ public class FileObj {
     private String name;
     private int size;
     private String owner;
-    private Boolean privateFile;//kanse gör til bool
+    private Boolean privateFile;
     private Boolean read;
     private Boolean write;
     private Boolean track;

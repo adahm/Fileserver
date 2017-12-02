@@ -207,7 +207,7 @@ public class FileDAO {
         }
     }
 
-    //return true if the track paramter is set to true and the user requesting is not the owner,
+    //return the owner if the track paramter is set to true and the user requesting is not the owner,
     public String checkIfTracked(String filname,String owner){
         try {
             checkTrackerSmt.setString(1,filname);
@@ -265,7 +265,7 @@ public class FileDAO {
             //set track to true in a given file
             setTrackerStmt = con.prepareStatement("UPDATE file SET track = ? WHERE name = ?");
             //check if the tracker is true in a given file and where the one that is checking is not the owner so we should send a message
-            checkTrackerSmt = con.prepareStatement("SELECT track FROM file WHERE name = ? AND owner <> ?");
+            checkTrackerSmt = con.prepareStatement("SELECT track,owner FROM file WHERE name = ? AND owner <> ?");
             //return a row if the given username and password pair exist in the table
             loginStmt = con.prepareStatement("SELECT * FROM account WHERE user = ? AND password =? ");
             //return the owner of a given file if the requester is the owner

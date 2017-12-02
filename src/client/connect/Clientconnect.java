@@ -31,13 +31,11 @@ public class Clientconnect {
         output.flush();
         filReader.close();
         output.close();
-        input.close();
-        client.close();
         System.out.println("sent");
     }
     //create a stream to write to the file and get the input from the server and write it to the file and then close the connection to the server
     public void downloadFile(File reciverFile) throws IOException{
-        byte[] buffer = new byte[1000000];
+        byte[] buffer = new byte[1000000000];
         BufferedOutputStream fileWrite = new BufferedOutputStream(new FileOutputStream(reciverFile));
         int n;
         System.out.println("reading input");
@@ -47,9 +45,6 @@ public class Clientconnect {
         fileWrite.flush();
         fileWrite.close();
         System.out.println("got file");
-
-        output.close();
-        input.close();
         client.close();
     }
 
